@@ -22,14 +22,12 @@ npm run dev
 Crie um ficheiro `.env.local` com:
 
 ```env
-DATABASE_PROVIDER="sqlite"
 DATABASE_URL="file:./dev.db"
 ```
 
 Para produção, use PostgreSQL em Vercel:
 
 ```env
-DATABASE_PROVIDER="postgresql"
 DATABASE_URL="postgresql://<user>:<password>@<host>:<port>/<database>?sslmode=require"
 ```
 

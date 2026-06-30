@@ -4,7 +4,6 @@
 - Vercel
 
 ## Required environment variables
-- DATABASE_PROVIDER=postgresql
 - DATABASE_URL=postgresql://<user>:<password>@<host>:<port>/<database>?sslmode=require
 
 ## Build steps
