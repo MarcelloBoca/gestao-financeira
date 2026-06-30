@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = env("DATABASE_PROVIDER")
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  categories      Category[]
+  expenseItems    ExpenseItem[]
+  monthlyExpenses MonthlyExpense[]
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user               User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expenseItems       ExpenseItem[]
+  monthlyExpenseLines MonthlyExpenseLine[]
+}
+
+model ExpenseItem {
+  id              String   @id @default(cuid())
+  userId          String
+  categoryId      String
+  name            String
+  unit            String?
+  defaultQuantity Float    @default(1)
+  defaultPrice    Float    @default(0)
+  recurring       Boolean  @default(false)
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user               User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category           Category             @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  monthlyExpenseLines MonthlyExpenseLine[]
+}
+
+model MonthlyExpense {
+  id           String   @id @default(cuid())
+  userId       String
+  month        Int
+  year         Int
+  status       String   @default("draft")
+  totalAmount  Float    @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user               User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  monthlyExpenseLines MonthlyExpenseLine[]
+  analyses           FinancialAnalysis[]
+}
+
+model MonthlyExpenseLine {
+  id                      String   @id @default(cuid())
+  monthlyExpenseId        String
+  categoryId              String?
+  expenseItemId           String?
+  itemNameSnapshot        String
+  categoryNameSnapshot    String
+  quantity                Float    @default(1)
+  unitPrice               Float    @default(0)
+  totalPrice              Float    @default(0)
+  previousUnitPrice       Float?
+  priceDifference         Float?
+  priceDifferencePercent  Float?
+  status                  String   @default("pending")
+  note                    String?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  monthlyExpense MonthlyExpense @relation(fields: [monthlyExpenseId], references: [id], onDelete: Cascade)
+  category       Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  expenseItem    ExpenseItem?   @relation(fields: [expenseItemId], references: [id], onDelete: SetNull)
+}
+
+model FinancialAnalysis {
+  id                   String   @id @default(cuid())
+  monthlyExpenseId     String
+  summary              String
+  alertsJson           String
+  recommendationsJson  String
+  risksJson            String
+  opportunitiesJson    String
+  criticalCategoriesJson String
+  criticalItemsJson     String
+  createdAt            DateTime @default(now())
+
+  monthlyExpense MonthlyExpense @relation(fields: [monthlyExpenseId], references: [id], onDelete: Cascade)
+}
